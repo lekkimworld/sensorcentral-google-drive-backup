@@ -1,15 +1,24 @@
 require("dotenv").config();
-const {getClient, getParentFolderId, getPath} = require("./common");
+const {getClient, getUploadCommandLineArguments, getPath, uploadFile, printCommandLineUsage} = require("./common");
 const path = require("path");
 const { google } = require("googleapis");
-const { createReadStream } = require("fs");
+const commandLineArgs = require("command-line-args");
 
-// read arguments from the command line
-if (process.argv.length < 3) {
-    console.log("Unable to read params from command line")
-    return process.exit(1);
+const optionDefinitions = getUploadCommandLineArguments();
+const options = commandLineArgs(optionDefinitions);
+if (options.help)
+    return printCommandLineUsage("Google Drive Upload", "Uploads a file to Google Drive", optionDefinitions);
+let folderId = options["folder-id"];
+if (!folderId) {
+    folderId = process.env.GOOGLE_DRIVE_PARENT_FOLDERID;
+    console.log(`No folder-id specified - read <${folderId}> from environment`);
 }
-let filename = getPath(process.argv[2]);
+let filename = options["filename"];
+if (!filename) {
+    console.error("No filename argument specified - aborting");
+    process.exit(1);
+}
+filename = getPath(filename);
 console.log(`Read filename <${filename}>`);
 if (filename.indexOf("%TODAY") >= 0) {
     let idx = filename.indexOf("%TODAY");
@@ -18,38 +27,7 @@ if (filename.indexOf("%TODAY") >= 0) {
     filename = `${filename.substring(0, idx)}${TODAY}${filename.substring(idx+6)}`;
 }
 console.log(`Using filename <${filename}>`);
-let parentFolderId = undefined;
-if (process.argv.length > 3) {
-    parentFolderId = process.argv[3];
-} else {
-    parentFolderId = getParentFolderId();
-}
-console.log(`Using parent folder ID <${parentFolderId}>`);
-
-function uploadFile(authClient, filename, parentFolderId) {
-    const mimeType = "application/octet-stream";
-    const p = path.parse(filename);
-    const name = p.base;
-    const requestBody = {
-        name,
-        mimeType
-    }
-    if (parentFolderId) requestBody.parents = [parentFolderId];
-
-    console.log(`Starting upload`);
-    const drive = google.drive({ version: "v3", auth: authClient });
-    drive.files.create({
-        requestBody,
-        media: {
-            mimeType,
-            body: createReadStream(filename),
-        },
-    }).then(res => {
-        console.log(`Uploaded <${filename}> to <${parentFolderId}>`);
-        return p;
-    })
-}
 
 getClient().then(client => {
-    return uploadFile(client, filename, parentFolderId)
+    return uploadFile(client, filename, folderId)
 }).catch(console.error);

@@ -3,16 +3,13 @@
     "version": "1.0.0",
     "description": "Scripts and postgres commands to perform backup and upload to Google Drive",
     "main": "index.js",
-    "scripts": {
-        "list": "node src/list.js",
-        "upload": "node src/upload.js",
-        "credentials": "node src/credentials.js"
-    },
     "keywords": [],
     "author": "Mikkel Flindt Heisterberg",
     "license": "MIT",
     "dependencies": {
         "@google-cloud/local-auth": "^2.1.0",
+        "command-line-args": "^5.2.1",
+        "command-line-usage": "^6.1.3",
         "dotenv": "^16.0.3",
         "googleapis": "^105.0.0"
     }

@@ -2,14 +2,11 @@ const fs = require("fs").promises;
 const path = require("path");
 const { google } = require("googleapis");
 const { authenticate } = require("@google-cloud/local-auth");
+const { createReadStream } = require("fs");
+const commandLineUsage = require("command-line-usage");
+
 
 const SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly", "https://www.googleapis.com/auth/drive"];
-
-const getParentFolderId = () => {
-    const PARENT_FOLDER = process.env.GOOGLE_DRIVE_PARENT_FOLDERID;
-    console.log(`Using Google Drive folder ID <${PARENT_FOLDER}>`);
-    return PARENT_FOLDER;
-}
 
 const getPath = (usePath, defaultPath) => {
     let p = usePath || defaultPath;
@@ -25,11 +22,11 @@ const getPath = (usePath, defaultPath) => {
 };
 
 const getTokenPath = () => {
-    return getPath(process.env.TOKEN_PATH, "/settings/token.json");
+    return getPath(process.env.GOOGLE_TOKEN_PATH, "/settings/token.json");
 };
 
 const getCredentialsPath = () => {
-    return getPath(process.env.CREDENTIALS_PATH, "/settings/credentials.json");
+    return getPath(process.env.GOOGLE_CREDENTIALS_PATH, "/settings/credentials.json");
 };
 
  /**
@@ -103,10 +100,86 @@ const authorize = async () => {
     }
 }
 
+function uploadFile(authClient, filename, parentFolderId) {
+    const mimeType = "application/octet-stream";
+    const p = path.parse(filename);
+    const name = p.base;
+    const requestBody = {
+        name,
+        mimeType,
+    };
+    if (parentFolderId) requestBody.parents = [parentFolderId];
+
+    console.log(`Starting upload`);
+    const drive = google.drive({ version: "v3", auth: authClient });
+    drive.files
+        .create({
+            requestBody,
+            media: {
+                mimeType,
+                body: createReadStream(filename),
+            },
+        })
+        .then((res) => {
+            console.log(`Uploaded <${filename}> to <${parentFolderId}>`);
+            return p;
+        });
+}
+
+const getDefaultCommandLineArguments = () => {
+    const optionDefinitions = [
+        { name: "help", type: Boolean, description: "Shows help" },
+        { name: "verbose", type: Boolean, description: "Runs in verbose mode" }
+    ];
+    return optionDefinitions;
+}
+
+const getListCommandLineArguments = () => {
+    const optionDefinitions = getDefaultCommandLineArguments();
+    optionDefinitions.push({
+        name: "folder-id",
+        type: String,
+        description: "Folder ID to upload file to if any",
+    });
+    return optionDefinitions;
+}
+
+const getUploadCommandLineArguments = () => {
+    const optionDefinitions = getDefaultCommandLineArguments();
+    optionDefinitions.push({
+        name: "folder-id",
+        type: String,
+        description: "Folder ID to upload file to if any"
+    });
+    optionDefinitions.push({
+        name: "filename",
+        type: String,
+        description: "Path of the file to upload",
+    });
+    return optionDefinitions;
+};
+
+const printCommandLineUsage = (title, description, options) => {
+    const sections = [
+        {
+            header: title,
+            content: description
+        },
+        {
+            header: 'Options',
+            optionList: options
+        }
+    ]
+    console.log(commandLineUsage(sections));
+}
+
 module.exports = {
     loadSavedCredentialsIfExist,
     getClient,
     authorize,
-    getParentFolderId,
-    getPath
+    getPath,
+    uploadFile,
+    getListCommandLineArguments,
+    getUploadCommandLineArguments,
+    printCommandLineUsage,
 };

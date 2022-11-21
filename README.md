@@ -1,5 +1,7 @@
-
-Uses `pg_dump` to dump the supplied database to a compressed backup called `dump.latest` in `/backup`. Once the backup completes the backup is copied to Google Drive.
+# sensorcentral-google-drive-backup #
+Docker image used to backup the sensorcentral database and upload to Google Drive. The backup is performed 
+with `pg_dump` and creates a compressed backup called `dump.latest-YYYYMMDD` in `/backup`. Once the backup completes 
+the backup is copied to Google Drive.
 
 ## Environment variables ##
 * POSTGRES_HOSTNAME
@@ -7,10 +9,10 @@ Uses `pg_dump` to dump the supplied database to a compressed backup called `dump
 * POSTGRES_PASSWORD
 * POSTGRES_DATABASE
 * GOOGLE_DRIVE_PARENT_FOLDERID (if set files go in this folder)
+* GOOGLE_TOKEN_FILE (defaults to `/settings/token.json`)
 * GOOGLE_CREDENTIALS_FILE (defaults to `/settings/credentials.json`)
-* DUMP_FILENAME_FORMAT (defaults to `dump.latest-${YYYYMMDD}`)
 
-## Running with docker ##
+## Building docker image ##
 ```
 docker build --tag lekkim/sensorcentral-backup .
 ```
