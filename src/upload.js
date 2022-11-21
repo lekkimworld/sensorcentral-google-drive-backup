@@ -23,8 +23,17 @@ console.log(`Read filename <${filename}>`);
 if (filename.indexOf("%TODAY") >= 0) {
     let idx = filename.indexOf("%TODAY");
     const now = new Date();
-    const TODAY = `${now.getFullYear()}${now.getMonth()+1 < 10 ? "0" + now.getMonth()+1 : now.getMonth()+1}${now.getDate()}`;
-    filename = `${filename.substring(0, idx)}${TODAY}${filename.substring(idx+6)}`;
+    const TODAY = `${now.getFullYear()}${
+        now.getMonth() + 1 < 10 ? "0" + now.getMonth() + 1 : now.getMonth() + 1
+    }${now.getDate()}`;
+    filename = `${filename.substring(0, idx)}${TODAY}${filename.substring(idx + 6)}`;
+} else if (filename.indexOf("%NOW") >= 0) {
+    let idx = filename.indexOf("%NOW");
+    const now = new Date();
+    const NOW = `${now.getFullYear()}${
+        now.getMonth() + 1 < 10 ? "0" + now.getMonth() + 1 : now.getMonth() + 1
+    }${now.getDate()}-${now.getHours()}${now.getMinutes() < 10 ? "0" + now.getMinutes() : now.getMinutes()}`;
+    filename = `${filename.substring(0, idx)}${NOW}${filename.substring(idx + 4)}`;
 }
 console.log(`Using filename <${filename}>`);
 
