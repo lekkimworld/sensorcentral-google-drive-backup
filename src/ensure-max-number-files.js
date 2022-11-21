@@ -12,8 +12,9 @@ if (!folderId) {
     console.log(`No folder-id specified - read <${folderId}> from environment`);
 }
 const max_num_files = options["maximum-number-files"];
-if (!max_num_files) {
+if (!max_num_files || `${max_num_files}`.length === 0 || Number.isNaN(max_num_files)) {
     console.log(`No maximum-number-files specified - aborting...`);
+    return process.exit(1);
 }
 
 getClient().then(client => {

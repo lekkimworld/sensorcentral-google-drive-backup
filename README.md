@@ -11,6 +11,7 @@ the backup is copied to Google Drive.
 * GOOGLE_DRIVE_PARENT_FOLDERID (if set files go in this folder)
 * GOOGLE_TOKEN_FILE (defaults to `/settings/token.json`)
 * GOOGLE_CREDENTIALS_FILE (defaults to `/settings/credentials.json`)
+* GOOGLE_DRIVE_NUMBER_FILES (number of files to keep in the Google Drive folder)
 
 ## Building docker image ##
 ```
