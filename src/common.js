@@ -144,6 +144,16 @@ const getListCommandLineArguments = () => {
     return optionDefinitions;
 }
 
+const getDeleteCommandLineArguments = () => {
+    const optionDefinitions = getDefaultCommandLineArguments();
+    optionDefinitions.push({
+        name: "id",
+        type: String,
+        description: "File ID to delete",
+    });
+    return optionDefinitions;
+};
+
 const getUploadCommandLineArguments = () => {
     const optionDefinitions = getDefaultCommandLineArguments();
     optionDefinitions.push({
@@ -181,5 +191,6 @@ module.exports = {
     uploadFile,
     getListCommandLineArguments,
     getUploadCommandLineArguments,
+    getDeleteCommandLineArguments,
     printCommandLineUsage,
 };

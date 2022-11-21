@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { google } = require("googleapis");
-const { getClient, getParentFolderId, getListCommandLineArguments, printCommandLineUsage } = require("./common");
+const { getClient, getListCommandLineArguments, printCommandLineUsage } = require("./common");
 const commandLineArgs = require("command-line-args");
 
 const optionDefinitions = getListCommandLineArguments();
