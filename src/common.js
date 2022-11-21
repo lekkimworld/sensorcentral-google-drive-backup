@@ -126,6 +126,29 @@ function uploadFile(authClient, filename, parentFolderId) {
         });
 }
 
+const listFiles = async (authClient, folderId) => {
+    const drive = google.drive({ version: "v3", auth: authClient });
+    const args = {
+        pageSize: 20,
+        fields: "nextPageToken, files(id, name, createdTime)",
+        orderBy: "createdTime",
+        q: `trashed = false`,
+    };
+    if (folderId) {
+        args.q = `${args.q} and '${folderId}' in parents`;
+    }
+    const res = await drive.files.list(args);
+    const files = res.data.files;
+    return files;
+}
+
+const deleteFileId = async (authClient, fileId) => {
+    const drive = google.drive({ version: "v3", auth: authClient });
+    return drive.files.delete({
+        fileId,
+    });
+}
+
 const getDefaultCommandLineArguments = () => {
     const optionDefinitions = [
         { name: "help", type: Boolean, description: "Shows help" },
@@ -169,6 +192,21 @@ const getUploadCommandLineArguments = () => {
     return optionDefinitions;
 };
 
+const getMaxNumberfilesCommandLineArguments = () => {
+    const optionDefinitions = getDefaultCommandLineArguments();
+    optionDefinitions.push({
+        name: "folder-id",
+        type: String,
+        description: "Folder ID to upload file to if any",
+    });
+    optionDefinitions.push({
+        name: "maximum-number-files",
+        type: Number,
+        description: "Maximum number of files the folder should have",
+    });
+    return optionDefinitions;
+};
+
 const printCommandLineUsage = (title, description, options) => {
     const sections = [
         {
@@ -192,5 +230,8 @@ module.exports = {
     getListCommandLineArguments,
     getUploadCommandLineArguments,
     getDeleteCommandLineArguments,
+    getMaxNumberfilesCommandLineArguments,
     printCommandLineUsage,
+    listFiles,
+    deleteFileId
 };
